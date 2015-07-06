@@ -77,8 +77,14 @@ function entityfilter_filter($text, $filter){
               }
               $value = $wrapper->{$match_parts[3]}->value();
               if($value){
-                $replaced = TRUE;
-                $text = str_replace($match, $value, $text);
+                if (is_string($value)) {
+                  $replaced = TRUE;
+                  $text = str_replace($match, $value, $text);
+                } else {
+                  throw new Exception(t('Property reference should return string. It return instead: @value', array(
+                    '@value' => print_r($value, TRUE)
+                  )));
+                }
               }
             }
           }
@@ -89,8 +95,9 @@ function entityfilter_filter($text, $filter){
           // errors on are not cached (I think).
           global $user;
           if($user->uid){
-            drupal_set_message(t('Error processing entity reference "@match"', array(
-              '@match' => $match
+            drupal_set_message(t('Error processing entity reference "@match": !error', array(
+              '@match' => $match,
+              '!error' => $e->getMessage()
             )), 'error');
           }
         }
